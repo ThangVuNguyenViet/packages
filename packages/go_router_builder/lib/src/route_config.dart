@@ -430,7 +430,6 @@ extension $_extensionName on $_className {
 class GoRelativeRouteConfig extends RouteBaseConfig {
   GoRelativeRouteConfig._({
     required this.path,
-    required this.name,
     required this.parentNavigatorKey,
     required super.routeDataClass,
     required super.parent,
@@ -438,9 +437,6 @@ class GoRelativeRouteConfig extends RouteBaseConfig {
 
   /// The path of the GoRoute to be created by this configuration.
   final String path;
-
-  /// The name of the GoRoute to be created by this configuration.
-  final String? name;
 
   /// The parent navigator key.
   final String? parentNavigatorKey;
@@ -633,7 +629,6 @@ extension $_extensionName on $_className {
   @override
   String get routeConstructorParameters => '''
     path: ${escapeDartString(path)},
-    ${name != null ? 'name: ${escapeDartString(name!)},' : ''}
     ${parentNavigatorKey == null ? '' : 'parentNavigatorKey: $parentNavigatorKey,'}
 ''';
 
@@ -778,10 +773,8 @@ abstract class RouteBaseConfig {
             element: element,
           );
         }
-        final ConstantReader nameValue = reader.read('name');
         value = GoRelativeRouteConfig._(
           path: pathValue.stringValue,
-          name: nameValue.isNull ? null : nameValue.stringValue,
           routeDataClass: classElement,
           parent: parent,
           parentNavigatorKey: _generateParameterGetterCode(
