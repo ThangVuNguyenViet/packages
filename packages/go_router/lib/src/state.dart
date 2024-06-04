@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 
 import 'configuration.dart';
 import 'misc/errors.dart';
+import 'path_utils.dart';
 import 'route.dart';
 
 /// The route state during routing.
@@ -145,6 +146,12 @@ class GoRouterState {
   }) {
     return _configuration.namedLocation(name,
         pathParameters: pathParameters, queryParameters: queryParameters);
+  }
+
+  /// Get a relative location from the current route with [location]
+  /// This is useful for navigating to a relative route.
+  String relativeLocation(String location) {
+    return concatenateUris(uri, Uri.parse(location)).toString();
   }
 
   @override

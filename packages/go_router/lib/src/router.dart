@@ -15,6 +15,7 @@ import 'logging.dart';
 import 'match.dart';
 import 'misc/inherited_router.dart';
 import 'parser.dart';
+import 'path_utils.dart';
 import 'route.dart';
 import 'state.dart';
 
@@ -333,28 +334,6 @@ class GoRouter implements RouterConfig<RouteMatchList> {
         queryParameters: queryParameters,
       );
 
-  /// Get a relative location from the current route with [location]
-  /// This is useful for navigating to a relative route.
-  String relativeLocation(String location, {Object? extra}) {
-    assert(
-      !location.startsWith('/'),
-      "Relative locations must not start with a '/'.",
-    );
-
-    final Uri currentUri = routeInformationProvider.value.uri;
-    Uri newUri = Uri.parse(
-      currentUri.path.endsWith('/')
-          ? '${currentUri.path}$location'
-          : '${currentUri.path}/$location',
-    );
-    newUri = newUri.replace(queryParameters: <String, dynamic>{
-      ...currentUri.queryParameters,
-      ...newUri.queryParameters,
-    });
-
-    return newUri.toString();
-  }
-
   /// Navigate to a URI location w/ optional query parameters, e.g.
   /// `/family/f2/person/p1?color=blue`
   void go(String location, {Object? extra}) {
@@ -362,12 +341,21 @@ class GoRouter implements RouterConfig<RouteMatchList> {
     routeInformationProvider.go(location, extra: extra);
   }
 
-  /// Navigate to a URI location by appending [location] to the current [GoRouterState.matchedLocation] w/ optional query parameters, e.g.
+  /// Get a relative location from the current route with [location]
+  /// This is useful for navigating to a relative route.
+  String relativeLocation(String location) {
+    return concatenateUris(
+            routeInformationProvider.value.uri, Uri.parse(location))
+        .toString();
+  }
+
+  /// Navigate to a URI location by appending [location] to the current GoRouter's location w/ optional query parameters, e.g.
+  /// `/family/f2/person/p1?color=blue`
   void goRelative(
     String location, {
     Object? extra,
   }) =>
-      go(relativeLocation(location, extra: extra));
+      go(relativeLocation(location), extra: extra);
 
   /// Restore the RouteMatchList
   void restore(RouteMatchList matchList) {
