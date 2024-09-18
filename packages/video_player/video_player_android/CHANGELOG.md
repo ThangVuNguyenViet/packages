@@ -1,3 +1,61 @@
+## 2.7.4
+
+* Fixes a [bug](https://github.com/flutter/flutter/issues/154559) where
+  resuming (or using a plugin like `share_plus` that implicitly resumes the
+  activity where) a video player would cause a `DecoderInitializationException`.
+
+## 2.7.3
+
+* Updates Media3-ExoPlayer to 1.4.1.
+
+## 2.7.2
+
+* Updates minimum supported SDK version to Flutter 3.24/Dart 3.5.
+
+* Re-adds Impeller support.
+
+
+## 2.7.1
+
+* Revert Impeller support.
+
+
+## 2.7.0
+
+* Re-adds [support for Impeller](https://docs.flutter.dev/release/breaking-changes/android-surface-plugins).
+
+## 2.6.0
+
+* Adds RTSP support.
+
+## 2.5.4
+
+* Updates Media3-ExoPlayer to 1.4.0.
+
+## 2.5.3
+
+* Updates lint checks to ignore NewerVersionAvailable.
+
+## 2.5.2
+
+* Updates Android Gradle plugin to 8.5.0.
+
+## 2.5.1
+
+* Removes additional references to the v1 Android embedding.
+
+## 2.5.0
+
+* Migrates ExoPlayer to Media3-ExoPlayer 1.3.1.
+
+## 2.4.17
+
+* Revert Impeller support.
+
+## 2.4.16
+
+* [Supports Impeller](https://docs.flutter.dev/release/breaking-changes/android-surface-plugins).
+
 ## 2.4.15
 
 * Updates minimum supported SDK version to Flutter 3.22/Dart 3.4.

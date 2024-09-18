@@ -338,14 +338,14 @@ class TreeView<T> extends StatefulWidget {
   ///
   /// By default, if this is unset, the [TreeView.defaultTreeNodeBuilder] is
   /// used.
-  final TreeViewNodeBuilder treeNodeBuilder;
+  final TreeViewNodeBuilder<T> treeNodeBuilder;
 
   /// Builds the [TreeRow] that describes the row for the provided
   /// [TreeViewNode].
   ///
   /// By default, if this is unset, the [TreeView.defaultTreeRowBuilder]
   /// is used.
-  final TreeViewRowBuilder treeRowBuilder;
+  final TreeViewRowBuilder<T> treeRowBuilder;
 
   /// If provided, the controller can be used to expand and collapse
   /// [TreeViewNode]s, or lookup information about the current state of the
@@ -360,7 +360,7 @@ class TreeView<T> extends StatefulWidget {
   /// a result of being toggled.
   ///
   /// This will not be called if a [TreeViewNode] does not have any children.
-  final TreeViewNodeCallback? onNodeToggle;
+  final TreeViewNodeCallback<T>? onNodeToggle;
 
   /// The default [AnimationStyle] for expanding and collapsing nodes in the
   /// [TreeView].
@@ -886,6 +886,15 @@ class _TreeViewState<T> extends State<TreeView<T>>
       if (widget.onNodeToggle != null) {
         widget.onNodeToggle!(node);
       }
+
+      // If animation is disabled or duration is zero, skip the animation
+      // and update the active nodes immediately. This ensures the tree
+      // is updated correctly when the node's children are no longer active.
+      if (widget.toggleAnimationStyle?.duration == Duration.zero) {
+        _unpackActiveNodes();
+        return;
+      }
+
       final AnimationController controller =
           _currentAnimationForParent[node]?.controller ??
               AnimationController(

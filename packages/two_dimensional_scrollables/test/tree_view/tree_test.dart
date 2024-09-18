@@ -130,7 +130,7 @@ void main() {
           controller: controller,
           treeNodeBuilder: (
             BuildContext context,
-            TreeViewNode<Object?> node,
+            TreeViewNode<String> node,
             AnimationStyle toggleAnimationStyle,
           ) {
             returnedController ??= TreeViewController.of(context);
@@ -153,7 +153,7 @@ void main() {
           tree: simpleNodeSet,
           treeNodeBuilder: (
             BuildContext context,
-            TreeViewNode<Object?> node,
+            TreeViewNode<String> node,
             AnimationStyle toggleAnimationStyle,
           ) {
             returnedController ??= TreeViewController.maybeOf(context);
@@ -454,9 +454,9 @@ void main() {
         home: TreeView<String>(
           tree: simpleNodeSet,
           controller: controller,
-          onNodeToggle: (TreeViewNode<Object?> node) {
+          onNodeToggle: (TreeViewNode<String> node) {
             toggled = true;
-            toggledNode = node as TreeViewNode<String>;
+            toggledNode = node;
           },
         ),
       ));
@@ -476,13 +476,13 @@ void main() {
         home: TreeView<String>(
           tree: simpleNodeSet,
           controller: controller,
-          onNodeToggle: (TreeViewNode<Object?> node) {
+          onNodeToggle: (TreeViewNode<String> node) {
             toggled = true;
-            toggledNode = node as TreeViewNode<String>;
+            toggledNode = node;
           },
           treeNodeBuilder: (
             BuildContext context,
-            TreeViewNode<Object?> node,
+            TreeViewNode<String> node,
             AnimationStyle toggleAnimationStyle,
           ) {
             final Duration animationDuration = toggleAnimationStyle.duration ??
@@ -510,7 +510,7 @@ void main() {
                   // Spacer
                   const SizedBox(width: 8.0),
                   // Content
-                  Text(node.content.toString()),
+                  Text(node.content),
                 ]),
               ),
             );
@@ -535,11 +535,11 @@ void main() {
           tree: simpleNodeSet,
           treeNodeBuilder: (
             BuildContext context,
-            TreeViewNode<Object?> node,
+            TreeViewNode<String> node,
             AnimationStyle toggleAnimationStyle,
           ) {
             style ??= toggleAnimationStyle;
-            return Text(node.content.toString());
+            return Text(node.content);
           },
         ),
       ));
@@ -558,11 +558,11 @@ void main() {
           toggleAnimationStyle: AnimationStyle.noAnimation,
           treeNodeBuilder: (
             BuildContext context,
-            TreeViewNode<Object?> node,
+            TreeViewNode<String> node,
             AnimationStyle toggleAnimationStyle,
           ) {
             style = toggleAnimationStyle;
-            return Text(node.content.toString());
+            return Text(node.content);
           },
         ),
       ));
@@ -580,11 +580,11 @@ void main() {
           ),
           treeNodeBuilder: (
             BuildContext context,
-            TreeViewNode<Object?> node,
+            TreeViewNode<String> node,
             AnimationStyle toggleAnimationStyle,
           ) {
             style ??= toggleAnimationStyle;
-            return Text(node.content.toString());
+            return Text(node.content);
           },
         ),
       ));
@@ -692,6 +692,127 @@ void main() {
       expect(find.text('Child 2:0'), findsNothing);
       expect(find.text('Child 2:1'), findsNothing);
       expect(find.text('Root 3'), findsOneWidget);
+    });
+
+    test('should use the generic type for callbacks and builders', () {
+      final TreeView<String> treeView = TreeView<String>(
+        tree: simpleNodeSet,
+        treeNodeBuilder: (
+          BuildContext context,
+          TreeViewNode<String> node,
+          AnimationStyle animationStyle,
+        ) {
+          return TreeView.defaultTreeNodeBuilder(
+            context,
+            node,
+            animationStyle,
+          );
+        },
+        treeRowBuilder: (TreeViewNode<String> node) {
+          return TreeView.defaultTreeRowBuilder(node);
+        },
+        onNodeToggle: (TreeViewNode<String> node) {},
+      );
+
+      expect(treeView.onNodeToggle, isA<TreeViewNodeCallback<String>>());
+      expect(treeView.treeNodeBuilder, isA<TreeViewNodeBuilder<String>>());
+      expect(treeView.treeRowBuilder, isA<TreeViewRowBuilder<String>>());
+    });
+
+    testWidgets(
+        'TreeViewNode should expand/collapse correctly when the animation duration is set to zero.',
+        (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/154292
+      final TreeViewController controller = TreeViewController();
+      final List<TreeViewNode<String>> tree = <TreeViewNode<String>>[
+        TreeViewNode<String>('First'),
+        TreeViewNode<String>(
+          'Second',
+          children: <TreeViewNode<String>>[
+            TreeViewNode<String>(
+              'alpha',
+              children: <TreeViewNode<String>>[
+                TreeViewNode<String>('uno'),
+                TreeViewNode<String>('dos'),
+                TreeViewNode<String>('tres'),
+              ],
+            ),
+            TreeViewNode<String>('beta'),
+            TreeViewNode<String>('kappa'),
+          ],
+        ),
+        TreeViewNode<String>(
+          'Third',
+          expanded: true,
+          children: <TreeViewNode<String>>[
+            TreeViewNode<String>('gamma'),
+            TreeViewNode<String>('delta'),
+            TreeViewNode<String>('epsilon'),
+          ],
+        ),
+        TreeViewNode<String>('Fourth'),
+      ];
+
+      await tester.pumpWidget(MaterialApp(
+        home: TreeView<String>(
+          tree: tree,
+          controller: controller,
+          toggleAnimationStyle: AnimationStyle(
+            curve: Curves.easeInOut,
+            duration: Duration.zero,
+          ),
+          treeNodeBuilder: (
+            BuildContext context,
+            TreeViewNode<Object?> node,
+            AnimationStyle animationStyle,
+          ) {
+            final Widget child = GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => controller.toggleNode(node),
+              child: TreeView.defaultTreeNodeBuilder(
+                context,
+                node,
+                animationStyle,
+              ),
+            );
+
+            return child;
+          },
+        ),
+      ));
+
+      expect(find.text('First'), findsOneWidget);
+      expect(find.text('Second'), findsOneWidget);
+      expect(find.text('Third'), findsOneWidget);
+      expect(find.text('Fourth'), findsOneWidget);
+      expect(find.text('alpha'), findsNothing);
+      expect(find.text('beta'), findsNothing);
+      expect(find.text('kappa'), findsNothing);
+      expect(find.text('gamma'), findsOneWidget);
+      expect(find.text('delta'), findsOneWidget);
+      expect(find.text('epsilon'), findsOneWidget);
+      expect(find.text('uno'), findsNothing);
+      expect(find.text('dos'), findsNothing);
+      expect(find.text('tres'), findsNothing);
+
+      await tester.tap(find.text('Second'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('alpha'), findsOneWidget);
+
+      await tester.tap(find.text('alpha'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('uno'), findsOneWidget);
+      expect(find.text('dos'), findsOneWidget);
+      expect(find.text('tres'), findsOneWidget);
+
+      await tester.tap(find.text('alpha'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('uno'), findsNothing);
+      expect(find.text('dos'), findsNothing);
+      expect(find.text('tres'), findsNothing);
     });
   });
 

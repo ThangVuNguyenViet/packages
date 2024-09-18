@@ -1,6 +1,10 @@
+## NEXT
+
+* Updates minimum supported SDK version to Flutter 3.19/Dart 3.3.
+
 ## 2.7.1
 
-- Adds `TypedRelativeGoRoute` annotation which supports relative routes.
+- Fixes readme typos and uses code excerpts.
 
 ## 2.7.0
 
