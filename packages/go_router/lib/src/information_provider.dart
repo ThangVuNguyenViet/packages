@@ -148,11 +148,11 @@ class GoRouteInformationProvider extends RouteInformationProvider
     } else if (location.startsWith('../')) {
       // Check for sibling location
       if (_value.uri.pathSegments.isNotEmpty) {
-        uri = concatenateUris(
-            Uri.parse(_value.uri.pathSegments
-                .sublist(0, _value.uri.pathSegments.length - 1)
-                .join('/')),
-            uri);
+        final Uri parentUri = Uri.parse(_value.uri.pathSegments
+            .sublist(0, _value.uri.pathSegments.length - 1)
+            .join('/'));
+        final Uri childUri = Uri.parse(location.replaceFirst('..', ''));
+        uri = concatenateUris(parentUri, childUri);
       }
     }
 
