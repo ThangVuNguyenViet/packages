@@ -142,9 +142,18 @@ class GoRouteInformationProvider extends RouteInformationProvider
   void _setValue(String location, Object state) {
     Uri uri = Uri.parse(location);
 
-    // Check for relative location
     if (location.startsWith('./')) {
+      // Check for relative location
       uri = concatenateUris(_value.uri, uri);
+    } else if (location.startsWith('../')) {
+      // Check for sibling location
+      if (_value.uri.pathSegments.isNotEmpty) {
+        uri = concatenateUris(
+            Uri.parse(_value.uri.pathSegments
+                .sublist(0, _value.uri.pathSegments.length - 1)
+                .join('/')),
+            uri);
+      }
     }
 
     final bool shouldNotify =
